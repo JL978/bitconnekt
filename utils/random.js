@@ -8,4 +8,4 @@ function randId(length) {
 	return result;
 }
 
-export default randId;
+module.exports = randId;

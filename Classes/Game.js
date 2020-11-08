@@ -107,8 +107,8 @@ function buildDeck(start, stop) {
 	return arr;
 }
 
-const game = new Game();
-game.shuffle_deck();
-console.log(game.deck);
+// const game = new Game();
+// game.shuffle_deck();
+// console.log(game.deck);
 
 module.exports = Game;
