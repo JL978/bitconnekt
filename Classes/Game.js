@@ -1,13 +1,12 @@
 class Game {
 	deck = buildDeck(3, 35);
-	players = [];
 	token_down = 0;
 	card_up;
 	turn = 0;
-	game_over = false;
+	is_over = false;
 
 	constructor(players) {
-		this.players = players;
+		this._players = players || [];
 		this.shuffle_deck();
 		this.shuffle_player();
 	}
@@ -31,7 +30,6 @@ class Game {
 			this.players[j] = temp;
 		}
 
-		this.players = this.players.map((player, index) => (player.id = index));
 		this.players();
 	}
 
@@ -62,16 +60,42 @@ class Game {
 		this.token_down = 0;
 	}
 
+	get_winner() {
+		const winner = [];
+		for (player of this.players) {
+			if (winner.length === 0) {
+				winner.push(player);
+			} else {
+				const current = winner[0].score();
+				if (current > player.score()) {
+					winner.splice(0, arr.length);
+					winner.push(player);
+				} else if (current === player.score()) {
+					winner.push(player);
+				}
+			}
+		}
+		return winner;
+	}
+
 	get deck() {
 		return this.deck;
 	}
 
 	get players() {
-		return this.players;
+		return this._players;
+	}
+
+	set players(arr) {
+		this._players = arr;
 	}
 
 	get turn() {
 		return this.turn;
+	}
+
+	get is_over() {
+		return this.is_over;
 	}
 }
 
