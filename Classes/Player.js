@@ -8,7 +8,6 @@ class Player {
 		this._name = name;
 		this._role = role;
 		this._position = position;
-		this._score = score;
 	}
 
 	pass() {

@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 4000;
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server, { origins: "*" });
+const io = socketio(server, { cors: true, origins: "*" });
 
 const Game = require("./Classes/Game");
 const Player = require("./Classes/Player");
@@ -55,16 +55,19 @@ const numPlayersInWaitRoom = (room_id) => {
 };
 
 io.on("connection", (socket) => {
+	console.log("connected");
 	//Main menu request -> Making a new room
 	socket.on("newRoom", ({ name }) => {
 		new Promise(makeRoom)
 			.then((room_id) => {
+				console.log(room_id);
 				const player = new Player(socket.id, name, "Moderator", 0);
 				joinWaitRooms(player, room_id);
 				socket.join(room_id);
-				socket.emit("newRoomCreated", room_id);
+				socket.emit("newRoomCreated", { room_id });
 			})
 			.catch((error) => {
+				console.log(error);
 				socket.emit(
 					"errorMessage",
 					"Oops the server couldn't create a new room right now, please try again"
