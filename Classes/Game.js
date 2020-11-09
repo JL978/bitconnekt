@@ -7,6 +7,7 @@ class Game {
 
 	constructor(players) {
 		this._players = players || [];
+		this._isWaiting = false;
 		this.shuffle_deck();
 		this.shuffle_player();
 	}
@@ -30,7 +31,7 @@ class Game {
 			this.players[j] = temp;
 		}
 
-		this.players();
+		this._players.map((player, index) => (player.turn = this.turn === index));
 	}
 
 	next_turn() {
@@ -39,6 +40,7 @@ class Game {
 		} else {
 			this.turn += 1;
 		}
+		this._players.map((player, index) => (player.turn = this.turn === index));
 	}
 
 	deal_card() {
@@ -76,6 +78,10 @@ class Game {
 			}
 		}
 		return winner;
+	}
+
+	set isWaiting(bool) {
+		this._isWaiting = bool;
 	}
 
 	get deck() {

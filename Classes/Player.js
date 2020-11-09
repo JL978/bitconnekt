@@ -3,11 +3,11 @@ class Player {
 	tokens = 11;
 	score = 0;
 
-	constructor(id, name, role, position) {
+	constructor(id, name, role) {
 		this._id = id;
 		this._name = name;
 		this._role = role;
-		this._position = position;
+		this._turn = false;
 	}
 
 	pass() {
@@ -77,6 +77,13 @@ class Player {
 
 	set position(num) {
 		this._position = num;
+	}
+
+	get turn() {
+		return this._turn;
+	}
+	set turn(bool) {
+		this._turn = bool;
 	}
 }
 
