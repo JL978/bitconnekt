@@ -2,12 +2,13 @@ class Game {
 	deck = buildDeck(3, 35);
 	token_down = 0;
 	card_up;
-	turn = 0;
+
 	is_over = false;
 
 	constructor(players) {
 		this._players = players || [];
 		this._isWaiting = false;
+		this._turn = 0;
 		this.shuffle_deck();
 		this.shuffle_player();
 	}
@@ -31,7 +32,7 @@ class Game {
 			this.players[j] = temp;
 		}
 
-		this._players.map((player, index) => (player.turn = this.turn === index));
+		this._players.map((player, index) => (player.turn = this._turn === index));
 	}
 
 	next_turn() {
@@ -40,7 +41,8 @@ class Game {
 		} else {
 			this.turn += 1;
 		}
-		this._players.map((player, index) => (player.turn = this.turn === index));
+		this._players.map((player, index) => (player.turn = this._turn === index));
+		console.log(this._players);
 	}
 
 	deal_card() {
@@ -52,14 +54,19 @@ class Game {
 	}
 
 	player_pass(id) {
-		this.players[id].pass();
+		const [currentPlayer] = this._players.filter((player) => player.id === id);
+		currentPlayer.pass();
 		this.token_down += 1;
+		this.next_turn();
 	}
 
 	player_take(id) {
-		this.players[id].take_card(card_up);
-		this.players[id].take_token(token_down);
+		const [currentPlayer] = this._players.filter((player) => player.id === id);
+		currentPlayer.take_card(this.card_up);
+		currentPlayer.take_token(this.token_down);
 		this.token_down = 0;
+		this.next_turn();
+		this.deal_card();
 	}
 
 	get_winner() {
@@ -97,7 +104,11 @@ class Game {
 	}
 
 	get turn() {
-		return this.turn;
+		return this._turn;
+	}
+
+	set turn(num) {
+		this._turn = num;
 	}
 
 	get is_over() {
@@ -116,5 +127,6 @@ function buildDeck(start, stop) {
 // const game = new Game();
 // game.shuffle_deck();
 // console.log(game.deck);
+// console.log(game.is_over);
 
 module.exports = Game;

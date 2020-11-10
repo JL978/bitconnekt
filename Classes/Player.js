@@ -19,7 +19,7 @@ class Player {
 
 	take_card(card) {
 		this.cards.push(card);
-		this.card.sort();
+		this.cards.sort((a, b) => a - b);
 	}
 
 	take_token(num) {

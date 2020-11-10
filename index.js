@@ -108,7 +108,8 @@ io.on("connection", (socket) => {
 		console.log();
 		const numPlayers = getNumPlayers(room_id);
 		if (isMod(socket.id, room_id)) {
-			if (numPlayers > 2) {
+			//CHANGE BACK TO 2 LATER
+			if (numPlayers > 1) {
 				game = rooms.get(room_id);
 				game.shuffle_player();
 				game.deal_card();
@@ -141,54 +142,57 @@ io.on("connection", (socket) => {
 	//Listener event for each move and emit different events depending on the state of the game
 	socket.on("move", ({ room_id, move }) => {
 		const player_id = socket.id;
-		const game = playRooms.get(room_id);
+		const game = rooms.get(room_id);
 
 		switch (move) {
 			case "PASS":
+				console.log("pass");
 				game.player_pass(player_id);
-				socket.to(room_id).emit("pass", player_id);
 				break;
 			case "TAKE":
+				console.log("take");
 				game.player_take(player_id);
-				socket.to(room_id).emit("take", player_id);
 				break;
 		}
 
-		game.deal_card();
+		console.log(game);
 
-		if (game.is_over()) {
-			socket.to(room_id).emit("gameOver");
+		if (game.is_over) {
+			io.in(room_id).emit("gameOver");
 		} else {
-			socket.to(room_id).emit("gameUpdate");
+			io.in(room_id).emit("gameUpdate", game);
 		}
 	});
 
-	//On disconnect event
-	// socket.on("disconnecting", () => {
-	// 	socket.to(room_id).emit("playerLeft", socket.id);
-	// 	//Get all the rooms that the socket is currently subscribed to
-	// 	const currentRooms = Object.keys(socket.rooms);
+	socket.on("disconnecting", () => {
+		//Get all the rooms that the socket is currently subscribed to
+		const currentRooms = Object.keys(socket.rooms);
 
-	// 	//In this game an object can only have 2 rooms max so we check for that
-	// 	if (currentRooms.length === 2) {
-	// 		//The game room is always the second element of the list
-	// 		const room_id = currentRooms[1];
-	// 		const num = getRoomPlayersNum(room);
-	// 		//If one then no one is left so we remove the room from the mapping
-	// 		if (num === 1) {
-	// 			rooms.delete(room);
-	// 		}
-	// 		//If 2 then there is one person left so we remove the socket leaving from the player list and
-	// 		//emit a waiting event to the other person
-	// 		if (num === 2) {
-	// 			currentRoom = rooms.get(room);
-	// 			currentRoom.players = currentRoom.players.filter(
-	// 				(player) => player.id !== socket.id
-	// 			);
-	// 			io.to(room).emit("waiting");
-	// 		}
-	// 	}
-	// });
+		//If the object has 2 rooms, it means that it is currently subscribed to a room other than itself
+		if (currentRooms.length === 2) {
+			//The game room is always the second element of the list
+			const room_id = currentRooms[1];
+
+			const num = getNumPlayers(room_id);
+			//If one then no one is left so we remove the room from the mapping
+			if (num === 1) {
+				rooms.delete(room_id);
+			}
+			//If 2 then there is one person left so we remove the socket leaving from the player list and
+			//emit a waiting event to the other person
+			else {
+				currentRoom = rooms.get(room_id);
+				const [playerLeaving] = currentRoom.players.filter(
+					(player) => player.id === socket.id
+				);
+				currentRoom.players = currentRoom.players.filter(
+					(player) => player.id !== socket.id
+				);
+
+				io.in(room_id).emit("playerLeft", { playerLeaving, game: currentRoom });
+			}
+		}
+	});
 });
 
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
