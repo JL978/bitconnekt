@@ -111,8 +111,7 @@ io.on("connection", (socket) => {
 	socket.on("start", ({ room_id }) => {
 		const numPlayers = getNumPlayers(room_id);
 		if (isMod(socket.id, room_id)) {
-			//CHANGE BACK TO 2 LATER
-			if (numPlayers > 1) {
+			if (numPlayers > 2) {
 				game = rooms.get(room_id);
 				game.shuffle_player();
 				game.deal_card();

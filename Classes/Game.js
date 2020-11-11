@@ -1,6 +1,5 @@
 class Game {
-	//CHANGE THIS BACK TO 35
-	deck = buildDeck(3, 7);
+	deck = buildDeck(3, 35);
 	token_down = 0;
 	card_up;
 	is_over = false;
