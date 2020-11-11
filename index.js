@@ -89,18 +89,22 @@ io.on("connection", (socket) => {
 
 	//Wait room request -> after users are redirected to the wait room
 	socket.on("joinRoom", ({ name, room_id }) => {
-		const player_id = socket.id;
+		if (rooms.has(room_id)) {
+			const player_id = socket.id;
 
-		const numPlayers = getNumPlayers(room_id);
-		const role = numPlayers === 0 ? "Moderator" : "Peasant";
-		const player = new Player(player_id, name, role, numPlayers);
+			const numPlayers = getNumPlayers(room_id);
+			const role = numPlayers === 0 ? "Moderator" : "Peasant";
+			const player = new Player(player_id, name, role, numPlayers);
 
-		joinRoom(player, room_id);
-		const players = getPlayers(room_id);
+			joinRoom(player, room_id);
+			const players = getPlayers(room_id);
 
-		socket.join(room_id);
-		socket.emit("roomJoined", { socket_id: player_id, players });
-		socket.to(room_id).emit("newPlayer", { players });
+			socket.join(room_id);
+			socket.emit("roomJoined", { socket_id: player_id, players });
+			socket.to(room_id).emit("newPlayer", { players });
+		} else {
+			socket.emit("errorRedirect");
+		}
 	});
 
 	//Request from a moderator to start a game
