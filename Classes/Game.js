@@ -1,8 +1,8 @@
 class Game {
-	deck = buildDeck(3, 35);
+	//CHANGE THIS BACK TO 35
+	deck = buildDeck(3, 7);
 	token_down = 0;
 	card_up;
-
 	is_over = false;
 
 	constructor(players) {
@@ -42,28 +42,28 @@ class Game {
 			this.turn += 1;
 		}
 		this._players.map((player, index) => (player.turn = this._turn === index));
-		console.log(this._players);
 	}
 
 	deal_card() {
-		if (this.deck !== 0) {
+		if (this.deck.length > 0) {
 			this.card_up = this.deck.pop();
 		} else {
-			this.game_over = true;
+			this.is_over = true;
 		}
 	}
 
 	player_pass(id) {
 		const [currentPlayer] = this._players.filter((player) => player.id === id);
 		currentPlayer.pass();
+
 		this.token_down += 1;
 		this.next_turn();
 	}
 
 	player_take(id) {
 		const [currentPlayer] = this._players.filter((player) => player.id === id);
-		currentPlayer.take_card(this.card_up);
-		currentPlayer.take_token(this.token_down);
+		currentPlayer.take(this.card_up, this.token_down);
+
 		this.token_down = 0;
 		this.next_turn();
 		this.deal_card();
@@ -71,20 +71,32 @@ class Game {
 
 	get_winner() {
 		const winner = [];
-		for (player of this.players) {
+		for (let player of this.players) {
 			if (winner.length === 0) {
 				winner.push(player);
 			} else {
-				const current = winner[0].score();
-				if (current > player.score()) {
-					winner.splice(0, arr.length);
+				const current = winner[0].score;
+				if (current > player.score) {
+					winner.splice(0, winner.length);
 					winner.push(player);
-				} else if (current === player.score()) {
+				} else if (current === player.score) {
 					winner.push(player);
 				}
 			}
 		}
 		return winner;
+	}
+
+	clear() {
+		this.turn = 0;
+		this.token_down = 0;
+		this.card_up = null;
+		this.is_over = false;
+		this.players.map((player) => player.reset());
+		this.deck = buildDeck(3, 7);
+		this.shuffle_player();
+		this.shuffle_deck();
+		this.deal_card();
 	}
 
 	set isWaiting(bool) {
@@ -113,6 +125,10 @@ class Game {
 
 	get is_over() {
 		return this.is_over;
+	}
+
+	get token_down() {
+		return this.token_down;
 	}
 }
 

@@ -105,7 +105,6 @@ io.on("connection", (socket) => {
 
 	//Request from a moderator to start a game
 	socket.on("start", ({ room_id }) => {
-		console.log();
 		const numPlayers = getNumPlayers(room_id);
 		if (isMod(socket.id, room_id)) {
 			//CHANGE BACK TO 2 LATER
@@ -126,7 +125,9 @@ io.on("connection", (socket) => {
 	//Request from a moderator to re-start a game
 	socket.on("restart", ({ room_id }) => {
 		if (isMod(socket.id, room_id)) {
-			io.in(room_id).emit("restartGame");
+			game = rooms.get(room_id);
+			game.clear();
+			io.in(room_id).emit("restartGame", game);
 		}
 	});
 
@@ -146,19 +147,16 @@ io.on("connection", (socket) => {
 
 		switch (move) {
 			case "PASS":
-				console.log("pass");
 				game.player_pass(player_id);
 				break;
 			case "TAKE":
-				console.log("take");
 				game.player_take(player_id);
 				break;
 		}
 
-		console.log(game);
-
 		if (game.is_over) {
-			io.in(room_id).emit("gameOver");
+			const winner = game.get_winner();
+			io.in(room_id).emit("gameOver", { winner, game });
 		} else {
 			io.in(room_id).emit("gameUpdate", game);
 		}
@@ -166,7 +164,7 @@ io.on("connection", (socket) => {
 
 	socket.on("disconnecting", () => {
 		//Get all the rooms that the socket is currently subscribed to
-		const currentRooms = Object.keys(socket.rooms);
+		const currentRooms = Array.from(socket.rooms);
 
 		//If the object has 2 rooms, it means that it is currently subscribed to a room other than itself
 		if (currentRooms.length === 2) {
@@ -181,15 +179,20 @@ io.on("connection", (socket) => {
 			//If 2 then there is one person left so we remove the socket leaving from the player list and
 			//emit a waiting event to the other person
 			else {
-				currentRoom = rooms.get(room_id);
-				const [playerLeaving] = currentRoom.players.filter(
+				game = rooms.get(room_id);
+				const [playerLeaving] = game.players.filter(
 					(player) => player.id === socket.id
 				);
-				currentRoom.players = currentRoom.players.filter(
+				const players = game.players.filter(
 					(player) => player.id !== socket.id
 				);
+				if (playerLeaving.role === "Moderator") {
+					players[0].role = "Moderator";
+				}
+				game.players = players;
+				game.clear();
 
-				io.in(room_id).emit("playerLeft", { playerLeaving, game: currentRoom });
+				io.in(room_id).emit("playerLeft", { playerLeaving, players });
 			}
 		}
 	});

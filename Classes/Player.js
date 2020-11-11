@@ -17,18 +17,17 @@ class Player {
 		//Handle case where there are no tokens left (maybe front-end logic)
 	}
 
-	take_card(card) {
+	take(card, tokens) {
 		this.cards.push(card);
 		this.cards.sort((a, b) => a - b);
-	}
 
-	take_token(num) {
-		this.tokens += num;
+		this.tokens += tokens;
+		this.calculate_score();
 	}
 
 	calculate_score() {
 		let prev;
-		let total;
+		let total = 0;
 		for (let i = 0; i < this.cards.length; i++) {
 			const current_card = this.cards[i];
 			if (prev !== current_card - 1) {
@@ -36,7 +35,14 @@ class Player {
 			}
 			prev = current_card;
 		}
-		this._score = total - tokens;
+		this.score = total - this.tokens;
+	}
+
+	reset() {
+		this.cards = [];
+		this.tokens = 11;
+		this.score = 0;
+		this.turn = false;
 	}
 
 	set score(num) {
@@ -70,6 +76,9 @@ class Player {
 	get role() {
 		return this._role;
 	}
+	set role(role) {
+		this._role = role;
+	}
 
 	get position() {
 		return this._position;
@@ -84,6 +93,10 @@ class Player {
 	}
 	set turn(bool) {
 		this._turn = bool;
+	}
+
+	get score() {
+		return this.score;
 	}
 }
 
