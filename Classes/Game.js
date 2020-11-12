@@ -92,7 +92,7 @@ class Game {
 		this.card_up = null;
 		this.is_over = false;
 		this.players.map((player) => player.reset());
-		this.deck = buildDeck(3, 7);
+		this.deck = buildDeck(3, 35);
 		this.shuffle_player();
 		this.shuffle_deck();
 		this.deal_card();
